@@ -5,6 +5,7 @@
       - nano
       - gpg
       - curl
+      - bc
       - mailutils
     state: present
     update_cache: yes
