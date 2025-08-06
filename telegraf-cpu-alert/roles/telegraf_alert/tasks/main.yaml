@@ -1,0 +1,62 @@
+---
+- name: Install required dependencies
+  apt:
+    name:
+      - nano
+      - gpg
+      - curl
+      - mailutils
+    state: present
+    update_cache: yes
+
+- name: Download InfluxData GPG key
+  get_url:
+    url: https://repos.influxdata.com/influxdata-archive.key
+    dest: /tmp/influxdata-archive.key
+    mode: '0644'
+
+- name: Validate GPG key fingerprint and move to trusted store
+  shell: |
+    gpg --show-keys --with-fingerprint --with-colons /tmp/influxdata-archive.key 2>&1 \
+    | grep -q '^fpr:\+24C975CBA61A024EE1B631787C3D57159FC2F927:$' \
+    && cat /tmp/influxdata-archive.key \
+    | gpg --dearmor \
+    | tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
+  args:
+    executable: /bin/bash
+
+- name: Add InfluxData apt repository
+  copy:
+    dest: /etc/apt/sources.list.d/influxdata.list
+    content: |
+      deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Telegraf
+  apt:
+    name: telegraf
+    state: present
+
+- name: Deploy custom Telegraf config
+  template:
+    src: telegraf.conf.j2
+    dest: /etc/telegraf/telegraf.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy CPU alert script
+  copy:
+    src: cpu_alert.sh
+    dest: /usr/local/bin/cpu_alert.sh
+    mode: '0755'
+
+- name: Restart Telegraf service
+  service:
+    name: telegraf
+    state: restarted
+    enabled: yes
+
