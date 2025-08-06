@@ -5,17 +5,17 @@
       - nano
       - gpg
       - curl
-      - mailutils
-    state: present
-    update_cache: yes
+      - mailutils  # to send mails
+    state: present                         # to install
+    update_cache: yes           
 
-- name: Download InfluxData GPG key
+- name: Download InfluxData GPG key                          # influx installation
   get_url:
     url: https://repos.influxdata.com/influxdata-archive.key
     dest: /tmp/influxdata-archive.key
     mode: '0644'
 
-- name: Validate GPG key fingerprint and move to trusted store
+- name: Validate GPG key fingerprint and move to trusted store           # stored 
   shell: |
     gpg --show-keys --with-fingerprint --with-colons /tmp/influxdata-archive.key 2>&1 \
     | grep -q '^fpr:\+24C975CBA61A024EE1B631787C3D57159FC2F927:$' \
@@ -42,7 +42,7 @@
 
 - name: Deploy custom Telegraf config
   template:
-    src: telegraf.conf.j2
+    src: telegraf.conf.j2     # telegraf config file (write)
     dest: /etc/telegraf/telegraf.conf
     owner: root
     group: root
@@ -50,11 +50,11 @@
 
 - name: Copy CPU alert script
   copy:
-    src: cpu_alert.sh
+    src: cpu_alert.sh        # write this file
     dest: /usr/local/bin/cpu_alert.sh
     mode: '0755'
 
-- name: Restart Telegraf service
+- name: Restart Telegraf service        #restarted everything which is written above
   service:
     name: telegraf
     state: restarted
