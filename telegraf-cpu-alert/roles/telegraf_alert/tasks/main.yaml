@@ -7,6 +7,9 @@
       - curl
       - bc
       - mailutils
+      - msmtp
+      - msmtp-mta
+      - ca-certificates
     state: present
     update_cache: yes
 
@@ -48,6 +51,27 @@
     owner: root
     group: root
     mode: '0644'
+    
+- name: Create msmtp config file
+  copy:
+    dest: /etc/msmtprc
+    content: |
+      defaults
+      auth           on
+      tls            on
+      tls_trust_file /etc/ssl/certs/ca-certificates.crt
+      logfile        /var/log/msmtp.log
+
+      account        gmail
+      host           smtp.gmail.com
+      port           587
+      from           mehziya0352@gmail.com
+      user           mehziya0352@gmail.com
+      password       {{ gmail_app_password }}
+      account default : gmail
+    owner: root
+    group: root
+    mode: '0600'
 
 - name: Copy CPU alert script
   copy:
