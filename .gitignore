@@ -1,0 +1,14 @@
+# Ignore shell configs and history
+.bashrc
+.bash_history
+.bash_profile
+
+# Ignore SSH configs
+.ssh/
+
+# Ignore cache directories
+.cache/
+
+# You can also add any other unwanted dotfiles:
+.env
+*.swp
